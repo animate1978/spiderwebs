@@ -40,7 +40,7 @@ def get_random_points_on_verts(mesh, amount, transform_matrix, seed=0):
     random.seed(seed)
     points = []
     for _ in range(amount):
-        points.append(transform_matrix * random.choice(mesh.vertices).co)
+        points.append(transform_matrix @ random.choice(mesh.vertices).co)
 
     return points
 
@@ -66,7 +66,7 @@ def get_random_points_on_edges(mesh, amount, transform_matrix, seed=0):
         v1 = mesh.vertices[edge.vertices[0]]
         v2 = mesh.vertices[edge.vertices[1]]
         p = v1.co + random.random() * (v2.co - v1.co)
-        points.append(transform_matrix * p)
+        points.append(transform_matrix @ p)
 
     return points
 
