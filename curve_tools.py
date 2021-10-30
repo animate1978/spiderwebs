@@ -17,9 +17,9 @@
 # ##### END GPL LICENSE BLOCK #####
 
 
+import bpy
 import time
 import math
-import bpy
 import mathutils
 import bmesh
 
@@ -242,7 +242,8 @@ def create_test_meshes(all_verts):
         mesh = create_mesh_from_vertices(verts)
 
         obj = data.objects.new("test_obj", mesh)
-        scene.objects.link(obj)
+        coll = context.view_layer.active_layer_collection.collection
+        coll.objects.link(obj)
 
 
 ##############################################################################

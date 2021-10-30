@@ -18,26 +18,17 @@
 
 
 # Import modules.
-if "bpy" in locals():
-    import importlib
-    if "mesh_tools" in locals():
-        importlib.reload(mesh_tools)
-    if "curve_tools" in locals():
-        importlib.reload(curve_tools)
-else:
-    from . import mesh_tools
-    from . import curve_tools
 
+import bpy
+from bpy.props import (IntProperty, FloatProperty, BoolProperty, EnumProperty)
+from . import curve_tools
+from . import mesh_tools
 import itertools
 import random
-import bpy
-from bpy.props import (IntProperty,
-                       FloatProperty,
-                       BoolProperty,
-                       EnumProperty)
 
 
-class Spiderweb(bpy.types.Operator):
+
+class CURVE_OT_Spiderweb(bpy.types.Operator):
     """Add a spiderweb (or wires) between the selected objects"""
     bl_idname = "curve.spiderweb"
     bl_label = "Create spiderweb"
@@ -46,26 +37,25 @@ class Spiderweb(bpy.types.Operator):
     def __init__(self):
         # Because creating a lot of wires can take some time and slow down the
         # viewport, set the initial amount of wires to 50 if it is higher.
-        if self.amount > 50:
-            self.amount = 50
+        self.amount = 50
 
-    amount = IntProperty(name="Amount",
-                         description="The number of wires to create",
+    amount : IntProperty(name="Amount",
+                         description="The number of strands to create",
                          default=20,
                          min=2,
                          max=999999,
                          soft_max=100)
-    main_iterations = IntProperty(name="Iterations",
+    main_iterations : IntProperty(name="Iterations",
                                   description="Iterations",
                                   default=1,
                                   min=1,
                                   max=100)
-    include_sub = BoolProperty(name="Recursive sub strands",
+    include_sub : BoolProperty(name="Recursive sub strands",
                                description="Sub strands will also be "
                                            "generated between already"
                                            " generated sub strands",
                                default=True)
-    sub_iterations = IntProperty(name="Iterations",
+    sub_iterations : IntProperty(name="Iterations",
                                  description="Iterations",
                                  default=3,
                                  min=0,
@@ -78,29 +68,29 @@ class Spiderweb(bpy.types.Operator):
                     ('SURFACE', 'Surface', 'Sample from surface(s)'),
                     ('EDGES', 'Edges', 'Sample from edges'),
                     ('VERTS', 'Vertices', 'Sample from vertices')]
-    method = EnumProperty(name="Method",
+    method : EnumProperty(name="Method",
                           description="Where to sample the end points of the "
                                       "curves from",
                           items=method_items,
                           default='SURFACE')
-    seed = IntProperty(name="Seed",
+    seed : IntProperty(name="Seed",
                        description="The seed to use for the generation "
                                    "(change it to get a different variant "
                                    "of the web)",
                        default=0)
-    drape_min = FloatProperty(name="Drape min",
+    drape_min : FloatProperty(name="Drape min",
                               description="The minimum drape of the strands",
                               default=-1.0,
                               soft_min=-50.0,
                               soft_max=50.0,
                               step=10)
-    drape_max = FloatProperty(name="Drape max",
+    drape_max : FloatProperty(name="Drape max",
                               description="The maximum drape of the strands",
                               default=0,
                               soft_min=-50.0,
                               soft_max=50.0,
                               step=10)
-    length_solver = BoolProperty(name="Length solver",
+    length_solver : BoolProperty(name="Length solver",
                                  description="The amount of drape is also "
                                              "dependent on the length of "
                                              "the strand",
@@ -174,19 +164,15 @@ class Spiderweb(bpy.types.Operator):
                 obj_amount = quotient + 1
             else:
                 obj_amount = quotient
-            points = mesh_tools.get_points(obj,
-                                           amount=obj_amount,
-                                           method=self.method,
-                                           apply_modifiers=True,
-                                           seed=self.seed)
+            points = mesh_tools.get_points(obj, amount=obj_amount, method=self.method, apply_modifiers=True, seed=self.seed)
             end_points.append([obj, points])
 
         end_vectors = list(itertools.chain(*(l[1] for l in end_points)))
 
         # Create splines between two random points.
-        if not len(end_vectors) > 1:
+        #if not len(end_vectors) > 1:
             # We need at least 2 points.
-            return
+            #return
 
         # Create the points of the main strands (every spline has 3 points)
         main_splines = []
@@ -262,8 +248,8 @@ class Spiderweb(bpy.types.Operator):
             curve_tools.create_spline(curve=curve, points=points)
 
         web = bpy.data.objects.new("web", curve)
-        bpy.context.scene.objects.link(web)
-        bpy.context.scene.objects.active = web
+        bpy.context.collection.objects.link(web)
+        bpy.context.view_layer.objects.active = web
 
         return {'FINISHED'}
 

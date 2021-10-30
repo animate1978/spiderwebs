@@ -20,43 +20,50 @@
 bl_info = {
     "name": "Create spider webs",
     "author": "Jasper van Nieuwenhuizen",
-    "version": (0, 1),
-    "blender": (2, 7, 5),
+    "version": (0, 2),
+    "blender": (2, 83, 0),
     "location": "View3D > Add > Curve ",
     "description": "Create spider webs or wires between objects",
     "warning": "wip",
-    "wiki_url": "",
+    "doc_url": "",
     "tracker_url": "",
     "support": 'COMMUNITY',
     "category": "Add Curve"}
 
 
+
 if "bpy" in locals():
     import importlib
-    if "add_curve_spiderwebs" in locals():
-        importlib.reload(add_curve_spiderwebs)
+    importlib.reload(add_curve_spiderwebs)
 else:
     from . import add_curve_spiderwebs
-
 import bpy
 
+# Register
+classes = (
+    add_curve_spiderwebs.CURVE_OT_Spiderweb,
+
+)
 
 # Register
-def Spiderweb_menu_item(self, context):
-    self.layout.operator(add_curve_spiderwebs.Spiderweb.bl_idname,
-                         text="Create spiderweb",
-                         icon="PLUGIN")
-
 
 def register():
-    bpy.utils.register_module(__name__)
-    bpy.types.INFO_MT_curve_add.append(Spiderweb_menu_item)
+    from bpy.utils import register_class
+    for cls in classes:
+        register_class(cls)
+    bpy.types.VIEW3D_MT_curve_add.append(Spiderweb_menu_item)
 
 
 def unregister():
-    bpy.utils.unregister_module(__name__)
-    bpy.types.INFO_MT_curve_add.remove(Spiderweb_menu_item)
+    from bpy.utils import unregister_class
+    for cls in reversed(classes):
+        unregister_class(cls)
+    bpy.types.VIEW3D_MT_curve_add.remove(Spiderweb_menu_item)
 
+def Spiderweb_menu_item(self, context):
+    self.layout.operator(add_curve_spiderwebs.CURVE_OT_Spiderweb.bl_idname,
+                         text="Create spiderweb",
+                         icon="OUTLINER_DATA_CURVE")
 
 if __name__ == "__main__":
     register()
